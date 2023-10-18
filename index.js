@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 require('dotenv').config();
 const cors = require('cors');
@@ -29,12 +29,38 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    //database name and collection name 
+    const productsCollection = client.db("productDB").collection('products');
+
+
+    //read data from the server 
+    app.get('/products', async(req, res) =>{
+        const cursor = productsCollection.find();
+        const result = await cursor.toArray();
+        res.send(result);
+    })
+
     //receive newProduct data from server side - post method
     app.post('/products', async(req, res)=>{
         const newProduct = req.body;
         console.log(newProduct);
+
+        const result = await productsCollection.insertOne(newProduct);
+        res.send(result);
     })
 
+    //delete a product from server side - delete method
+
+    app.delete('/products/:id', async(req, res)=>{
+        const id = req.params.id;
+        const query = {
+            _id : new ObjectId(id)
+        }
+
+        const result = await productsCollection.deleteOne(query);
+        res.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
