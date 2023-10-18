@@ -33,6 +33,21 @@ async function run() {
     //database name and collection name 
     const productsCollection = client.db("productDB").collection('products');
 
+    //creating collection for brand name
+    const brandCollection = client.db("productDB").collection('brands');
+
+    app.get('/brands', async (req, res) => {
+        const cursor = brandCollection.find();
+        const result = await cursor.toArray();
+        res.send(result);
+    });
+
+    app.post('/brands', async(req, res)=>{
+        const newBrand = req.body;
+        console.log(newBrand);
+        const result = await brandCollection.insertOne(newBrand);
+        res.send(result);
+    })
 
     //read data from the server 
     app.get('/products', async(req, res) =>{
